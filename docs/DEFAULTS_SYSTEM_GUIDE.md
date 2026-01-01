@@ -716,8 +716,8 @@ EOF
 ### Need More Information?
 
 - 📖 [Main Documentation](../../docs/)
-- 🐛 [Report Issues](https://github.com/community-scripts/ProxmoxVED/issues)
-- 💬 [Discussions](https://github.com/community-scripts/ProxmoxVED/discussions)
+- 🐛 [Report Issues](https://github.com/b3ni/ProxmoxVED/issues)
+- 💬 [Discussions](https://github.com/b3ni/ProxmoxVED/discussions)
 
 ### Useful Commands
 
