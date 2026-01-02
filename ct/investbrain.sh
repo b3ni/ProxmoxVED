@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source <(curl -fsSL https://raw.githubusercontent.com/b3ni/ProxmoxVED/main/misc/build.func)
+source <(curl -fsSL https://raw.githubusercontent.com/b3ni/ProxmoxVED/refs/heads/testing/misc/build.func)
 # Copyright (c) 2021-2025 community-scripts ORG
 # Author: Benito Rodríguez (b3ni)
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
@@ -31,7 +31,7 @@ function update_script() {
 
   PG_VERSION="17" setup_postgresql
 
-  if check_for_gh_release "investbrain" "investbrainapp/investbrain"; then
+  if check_for_gh_release "Investbrain" "investbrainapp/investbrain"; then
     msg_info "Stopping Services"
     systemctl stop nginx
     systemctl stop php8.4-fpm
@@ -45,11 +45,10 @@ function update_script() {
     cp -r /opt/investbrain/storage /opt/storage.backup
     msg_ok "Created Backup"
 
-    RELEASE=$(curl -fsSL https://api.github.com/repos/investbrainapp/investbrain/releases/latest | grep "tag_name" | awk '{print substr($2, 3, length($2)-4) }')
-    msg_info "Updating Investbrain to $RELEASE"
+    msg_info "Updating Investbrain"
     rm -rf /opt/investbrain-new
     mkdir -p /opt/investbrain-new
-    curl -fsSL "https://github.com/investbrainapp/investbrain/archive/refs/tags/v${RELEASE}.tar.gz" | tar -xz --strip-components=1 -C /opt/investbrain-new
+    fetch_and_deploy_gh_release "Investbrain" "investbrainapp/investbrain" "tarball" "latest" "/opt/investbrain-new"
 
     cd /opt/investbrain
     cp -r /opt/investbrain-new/* /opt/investbrain/
@@ -89,7 +88,6 @@ function update_script() {
 
     chown -R www-data:www-data /opt/investbrain
     chmod -R 755 /opt/investbrain/storage /opt/investbrain/bootstrap/cache
-    echo "${RELEASE}" >/root/.investbrain
 
     rm -rf /opt/.env.backup /opt/storage.backup
     msg_ok "Updated Investbrain"
