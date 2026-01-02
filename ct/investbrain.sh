@@ -52,8 +52,8 @@ function update_script() {
     curl -fsSL "https://github.com/investbrainapp/investbrain/archive/refs/tags/v${RELEASE}.tar.gz" | tar -xz --strip-components=1 -C /opt/investbrain-new
 
     cd /opt/investbrain
-    rm -rf /opt/investbrain/storage
     cp -r /opt/investbrain-new/* /opt/investbrain/
+    rm -rf /opt/investbrain/storage
     rm -rf /opt/investbrain-new
 
     cp /opt/.env.backup /opt/investbrain/.env
