@@ -39,6 +39,8 @@ function update_script() {
     msg_ok "Services Stopped"
 
     msg_info "Creating Backup"
+    rm -f /opt/.env.backup
+    rm -rf /opt/storage.backup
     cp /opt/investbrain/.env /opt/.env.backup
     cp -r /opt/investbrain/storage /opt/storage.backup
     msg_ok "Created Backup"
@@ -55,7 +57,7 @@ function update_script() {
     rm -rf /opt/investbrain-new
 
     cp /opt/.env.backup /opt/investbrain/.env
-    cp -r /opt/storage.backup /opt/investbrain/storage
+    cp -r /opt/storage.backup/ /opt/investbrain/storage
 
     chown -R www-data:www-data /opt/investbrain
     chmod -R 775 /opt/investbrain/storage
