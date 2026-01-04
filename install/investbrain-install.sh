@@ -99,8 +99,12 @@ $STD npm run build
 mkdir -p /opt/investbrain/storage/{framework/cache,framework/sessions,framework/views,app,logs}
 $STD php artisan migrate --force
 $STD php artisan storage:link
-$STD php artisan optimize:clear
-$STD php artisan optimize
+$STD php artisan cache:clear
+$STD php artisan view:clear
+$STD php artisan route:clear
+$STD php artisan event:clear
+$STD php artisan route:cache
+$STD php artisan event:cache
 chown -R www-data:www-data /opt/investbrain
 chmod -R 775 /opt/investbrain/bootstrap/cache
 msg_ok "Installed Investbrain"
