@@ -59,10 +59,7 @@ function update_script() {
 
     cp /opt/.env.backup /opt/investbrain/.env
     cp -r /opt/investbrain_backup/ /opt/investbrain/storage
-
-    chown -R www-data:www-data /opt/investbrain
-    mkdir -p /opt/investbrain/{storage/framework/cache/data,storage/framework/sessions,storage/framework/views,storage/logs,bootstrap/cache}
-    chown -R www-data:www-data /opt/investbrain/{storage,bootstrap/cache}
+    mkdir -p /opt/investbrain/storage/{framework/cache,framework/sessions,framework/views,app,logs}
 
     export COMPOSER_ALLOW_SUPERUSER=1
     $STD composer install --no-interaction --no-dev --optimize-autoloader
@@ -70,22 +67,17 @@ function update_script() {
     $STD npm run build
     $STD php artisan storage:link
     $STD php artisan migrate --force
-    $STD php artisan cache:clear
-    $STD php artisan view:clear
-    $STD php artisan route:clear
-    $STD php artisan event:clear
-    $STD php artisan route:cache
-    $STD php artisan event:cache
+    $STD php artisan optimize:clear
+    $STD php artisan optimize
 
     chown -R www-data:www-data /opt/investbrain
-    chmod -R 755 /opt/investbrain/storage /opt/investbrain/bootstrap/cache
+    chmod -R 775 /opt/investbrain/storage /opt/investbrain/bootstrap/cache
 
     rm -rf /opt/.env.backup /opt/investbrain_backup
     msg_ok "Updated Investbrain"
 
     msg_info "Starting Services"
-    systemctl start php8.4-fpm
-    systemctl start nginx
+    systemctl start php8.4-fpm nginx
     supervisorctl start all
     msg_ok "Services Started"
 

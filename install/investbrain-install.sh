@@ -99,29 +99,14 @@ export COMPOSER_ALLOW_SUPERUSER=1
 $STD composer install --no-interaction --no-dev --optimize-autoloader
 $STD npm install
 $STD npm run build
-msg_ok "Installed Investbrain"
-
-msg_info "Setting up Storage"
-mkdir -p /opt/investbrain/storage/framework/cache
-mkdir -p /opt/investbrain/storage/framework/sessions
-mkdir -p /opt/investbrain/storage/framework/views
-mkdir -p /opt/investbrain/storage/app
-mkdir -p /opt/investbrain/storage/logs
-chmod -R 775 /opt/investbrain/storage
-chown -R www-data:www-data /opt/investbrain/storage
-msg_ok "Setup Storage"
-
-msg_info "Running Migrations"
+mkdir -p /opt/investbrain/storage/{framework/cache,framework/sessions,framework/views,app,logs}
 $STD php artisan migrate --force
 $STD php artisan storage:link
-msg_ok "Ran Migrations"
-
-msg_info "Clearing and Caching"
 $STD php artisan optimize:clear
 $STD php artisan optimize
 chown -R www-data:www-data /opt/investbrain
-chmod -R 755 /opt/investbrain/bootstrap/cache
-msg_ok "Cleared and Cached"
+chmod -R 775 /opt/investbrain/bootstrap/cache
+msg_ok "Installed Investbrain"
 
 msg_info "Configuring Nginx"
 cat <<EOF >/etc/nginx/sites-available/investbrain.conf
