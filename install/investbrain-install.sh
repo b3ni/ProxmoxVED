@@ -38,8 +38,8 @@ fetch_and_deploy_gh_release "Investbrain" "investbrainapp/investbrain" "tarball"
 LOCAL_IP=$(hostname -I | awk '{print $1}')
 APP_KEY=$(openssl rand -base64 32)
 
-msg_info "Installing Investbrain"
-
+msg_info "Installing Investbrain (Patience)"
+cd /opt/investbrain
 cat <<EOF >/opt/investbrain/.env
 APP_KEY=base64:${APP_KEY}
 APP_PORT=8000
@@ -92,9 +92,6 @@ MAIL_FROM_ADDRESS="investbrain@${LOCAL_IP}"
 
 VITE_APP_NAME=Investbrain
 EOF
-msg_ok "Setup Investbrain"
-
-msg_info "Installing Investbrain (Patience)"
 export COMPOSER_ALLOW_SUPERUSER=1
 $STD composer install --no-interaction --no-dev --optimize-autoloader
 $STD npm install
