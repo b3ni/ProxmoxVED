@@ -29,56 +29,47 @@ function update_script() {
     exit
   fi
 
-  PG_VERSION="17" setup_postgresql
-
   if check_for_gh_release "Investbrain" "investbrainapp/investbrain"; then
     msg_info "Stopping Services"
-    systemctl stop nginx
-    systemctl stop php8.4-fpm
+    systemctl stop nginx php8.4-fpm
     supervisorctl stop all
     msg_ok "Services Stopped"
 
+    PHP_VERSION="8.4" PHP_FPM=YES PHP_MODULE="gd,zip,intl,pdo,pgsql,pdo-pgsql,bcmath,opcache,mbstring,redis" setup_php
+    setup_composer
+    NODE_VERSION="22" setup_nodejs
+    PG_VERSION="17" setup_postgresql
+
     msg_info "Creating Backup"
     rm -f /opt/.env.backup
-    rm -rf /opt/storage.backup
+    rm -rf /opt/investbrain_backup
     cp /opt/investbrain/.env /opt/.env.backup
-    cp -r /opt/investbrain/storage /opt/storage.backup
+    cp -r /opt/investbrain/storage /opt/investbrain_backup
     msg_ok "Created Backup"
 
-    msg_info "Updating Investbrain"
     rm -rf /opt/investbrain-new
     mkdir -p /opt/investbrain-new
     fetch_and_deploy_gh_release "Investbrain" "investbrainapp/investbrain" "tarball" "latest" "/opt/investbrain-new"
 
+    msg_info "Updating Investbrain"
     cd /opt/investbrain
     cp -r /opt/investbrain-new/* /opt/investbrain/
     rm -rf /opt/investbrain/storage
     rm -rf /opt/investbrain-new
 
     cp /opt/.env.backup /opt/investbrain/.env
-    cp -r /opt/storage.backup/ /opt/investbrain/storage
+    cp -r /opt/investbrain_backup/ /opt/investbrain/storage
 
     chown -R www-data:www-data /opt/investbrain
-    chmod -R 775 /opt/investbrain/storage
-    mkdir -p /opt/investbrain/storage/framework/cache/data
-    mkdir -p /opt/investbrain/storage/framework/sessions
-    mkdir -p /opt/investbrain/storage/framework/views
-    mkdir -p /opt/investbrain/storage/logs
-    mkdir -p /opt/investbrain/bootstrap/cache
+    mkdir -p /opt/investbrain/{storage/framework/cache/data,storage/framework/sessions,storage/framework/views,storage/logs,bootstrap/cache}
     chown -R www-data:www-data /opt/investbrain/{storage,bootstrap/cache}
-
-    PHP_VERSION="8.4" PHP_FPM=YES PHP_MODULE="gd,zip,intl,pdo,pgsql,pdo-pgsql,bcmath,opcache,mbstring,redis" setup_php
-    setup_composer
 
     export COMPOSER_ALLOW_SUPERUSER=1
     $STD composer install --no-interaction --no-dev --optimize-autoloader
-
     $STD npm install
     $STD npm run build
-
     $STD php artisan storage:link
     $STD php artisan migrate --force
-
     $STD php artisan cache:clear
     $STD php artisan view:clear
     $STD php artisan route:clear
@@ -89,7 +80,7 @@ function update_script() {
     chown -R www-data:www-data /opt/investbrain
     chmod -R 755 /opt/investbrain/storage /opt/investbrain/bootstrap/cache
 
-    rm -rf /opt/.env.backup /opt/storage.backup
+    rm -rf /opt/.env.backup /opt/investbrain_backup
     msg_ok "Updated Investbrain"
 
     msg_info "Starting Services"
@@ -99,8 +90,6 @@ function update_script() {
     msg_ok "Services Started"
 
     msg_ok "Updated Successfully!"
-  else
-    msg_ok "No update available"
   fi
   exit
 }

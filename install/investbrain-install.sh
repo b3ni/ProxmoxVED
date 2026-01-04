@@ -33,11 +33,12 @@ NODE_VERSION="22" setup_nodejs
 PG_VERSION="17" setup_postgresql
 PG_DB_NAME="investbrain" PG_DB_USER="investbrain" setup_postgresql_db
 
-msg_info "Installing Investbrain"
 mkdir -p /opt/investbrain
 fetch_and_deploy_gh_release "Investbrain" "investbrainapp/investbrain" "tarball" "latest" "/opt/investbrain"
 LOCAL_IP=$(hostname -I | awk '{print $1}')
 APP_KEY=$(openssl rand -base64 32)
+
+msg_info "Installing Investbrain"
 
 cat <<EOF >/opt/investbrain/.env
 APP_KEY=base64:${APP_KEY}
@@ -91,7 +92,6 @@ MAIL_FROM_ADDRESS="investbrain@${LOCAL_IP}"
 
 VITE_APP_NAME=Investbrain
 EOF
-
 msg_ok "Setup Investbrain"
 
 msg_info "Installing Investbrain (Patience)"
@@ -117,17 +117,13 @@ $STD php artisan storage:link
 msg_ok "Ran Migrations"
 
 msg_info "Clearing and Caching"
-$STD php artisan cache:clear
-$STD php artisan view:clear
-$STD php artisan route:clear
-$STD php artisan event:clear
-$STD php artisan route:cache
+$STD php artisan optimize:clear
+$STD php artisan optimize
 chown -R www-data:www-data /opt/investbrain
 chmod -R 755 /opt/investbrain/bootstrap/cache
 msg_ok "Cleared and Cached"
 
 msg_info "Configuring Nginx"
-PHPVER=$(php -r 'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION . "\n";')
 cat <<EOF >/etc/nginx/sites-available/investbrain.conf
 server {
     listen 8000 default_server;
@@ -148,7 +144,7 @@ server {
     }
 
     location ~ \.php\$ {
-        fastcgi_pass unix:/var/run/php/php${PHPVER}-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php${PHP_VERSION}-fpm.sock;
         fastcgi_param SCRIPT_FILENAME \$realpath_root\$fastcgi_script_name;
         include fastcgi_params;
         fastcgi_hide_header X-Powered-By;
@@ -183,7 +179,6 @@ stdout_logfile_maxbytes=50MB
 stdout_logfile_backups=10
 numprocs=1
 EOF
-
 $STD supervisorctl reread
 $STD supervisorctl update
 $STD supervisorctl start all
@@ -197,13 +192,13 @@ chmod 644 /etc/cron.d/investbrain-scheduler
 $STD systemctl restart cron
 msg_ok "Setup Cron for Scheduler"
 
-{
-  echo ""
-  echo "Investbrain Database Credentials"
-  echo "Database Name: ${PG_DB_NAME}"
-  echo "Database User: ${PG_DB_USER}"
-  echo "Database Password: ${PG_DB_PASS}"
-} >>~/investbrain.creds
+# {
+#   echo ""
+#   echo "Investbrain Database Credentials"
+#   echo "Database Name: ${PG_DB_NAME}"
+#   echo "Database User: ${PG_DB_USER}"
+#   echo "Database Password: ${PG_DB_PASS}"
+# } >>~/investbrain.creds
 
 motd_ssh
 customize
