@@ -177,14 +177,6 @@ chmod 644 /etc/cron.d/investbrain-scheduler
 $STD systemctl restart cron
 msg_ok "Setup Cron for Scheduler"
 
-# {
-#   echo ""
-#   echo "Investbrain Database Credentials"
-#   echo "Database Name: ${PG_DB_NAME}"
-#   echo "Database User: ${PG_DB_USER}"
-#   echo "Database Password: ${PG_DB_PASS}"
-# } >>~/investbrain.creds
-
 motd_ssh
 customize
 cleanup_lxc
